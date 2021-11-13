@@ -13,9 +13,14 @@ import struct
 # Declare motors 
 left_motor = Motor(Port.B)
 right_motor = Motor(Port.C)
+grab_motor = Motor(Port.D)
+lift_motor = Motor(Port.A)
 
 # Initialize variables. 
 # Assuming sticks are in the middle when starting.
+left_stick_x = 124
+left_stick_y = 124
+
 right_stick_x = 124
 right_stick_y = 124
 
@@ -50,20 +55,36 @@ event = in_file.read(EVENT_SIZE)
 
 while event:
     (tv_sec, tv_usec, ev_type, code, value) = struct.unpack(FORMAT, event)
-    if ev_type == 3 and code == 3:
-        right_stick_x = value
+    if ev_type == 3 and code == 0:
+        left_stick_x = value
+    if ev_type == 3 and code == 1:
+        left_stick_y = value
+
     if ev_type == 3 and code == 4:
         right_stick_y = value
 
+    if ev_type == 3 and code == 2:
+        right_stick_x = value
+
+    if ev_type == 3 and code == 5:
+        right_stick_x = -value   
+
     # Scale stick positions to -100,100
-    forward = scale(right_stick_y, (0,255), (-100,100))
-    left = scale(right_stick_x, (0,255), (-100,100))
+    forward = scale(left_stick_y, (0,255), (-100,100))
+    left = scale(left_stick_x, (0,255), (-100,100))
+
+    lift = scale(right_stick_y, (0,255), (40,-40))
+    grab = scale(right_stick_x, (-255,255), (-50,50))
+    
 
     # Set motor voltages. If we're steering left, the left motor
     # must run backwards so it has a -left component
     # It has a forward component for going forward too. 
     left_motor.dc(forward - left)
     right_motor.dc(forward + left)
+
+    grab_motor.dc(grab)
+    lift_motor.dc(lift)
 
     # Finally, read another event
     event = in_file.read(EVENT_SIZE)
