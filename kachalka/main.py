@@ -11,10 +11,9 @@ from pybricks.robotics import DriveBase
 import struct
 
 # Declare motors 
-left_motor = Motor(Port.B, positive_direction=Direction.COUNTERCLOCKWISE)
-right_motor = Motor(Port.C, positive_direction=Direction.COUNTERCLOCKWISE)
-grab_motor = Motor(Port.D)
-lift_motor = Motor(Port.A)
+left_motor = Motor(Port.A)
+right_motor = Motor(Port.B)
+
 
 # Initialize variables. 
 # Assuming sticks are in the middle when starting.
@@ -71,20 +70,10 @@ while event:
 
     # Scale stick positions to -100,100
     forward = scale(left_stick_y, (0,255), (-100,100))
-    left = scale(left_stick_x, (0,255), (-100,100))
+   
 
-    lift = scale(right_stick_y, (0,255), (40,-40))
-    grab = scale(right_stick_x, (-255,255), (-50,50))
-    
-
-    # Set motor voltages. If we're steering left, the left motor
-    # must run backwards so it has a -left component
-    # It has a forward component for going forward too. 
-    left_motor.dc(forward - left)
-    right_motor.dc(forward + left)
-
-    grab_motor.dc(grab)
-    lift_motor.dc(lift)
+    left_motor.track_target(forward)
+    right_motor.track_target(forward)
 
     # Finally, read another event
     event = in_file.read(EVENT_SIZE)
